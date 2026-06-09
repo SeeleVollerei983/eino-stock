@@ -35,3 +35,6 @@ fix_*.mjs
 # === OS ===
 Thumbs.db .DS_Store
 *.cert *.key
+
+# Npm lock hash
+*.md5

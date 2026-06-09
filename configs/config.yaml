@@ -1,0 +1,23 @@
+﻿server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 30s
+  grpc:
+    addr: 0.0.0.0:9000
+    timeout: 30s
+data:
+  database:
+    driver: sqlite
+    source: d:\go-stock\eino-stock\data\eino-stock.db
+  redis:
+    addr: 127.0.0.1:6379
+    read_timeout: 0.2s
+    write_timeout: 0.2s
+data_source:
+  http_timeout: 15s
+  qgqp_b_id: ""
+  iwencai_api_key: ""
+ai:
+  llm_api_key: ""
+  llm_base_url: "https://api.deepseek.com"
+  llm_model: "deepseek-chat"

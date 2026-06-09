@@ -1,0 +1,110 @@
+// 使用 Protocol Buffers 第三版语法
+syntax = "proto3";
+
+// 定义包名，用于组织服务和消息
+package market.v1;
+
+// 导入 Google API 注解，用于定义 HTTP 路由映射
+import "google/api/annotations.proto";
+
+// 定义 Go 语言的包路径，分号后是包名
+option go_package = "eino-stock/api/market/v1;v1";
+
+// 股票行情服务，提供股票搜索、实时行情查询、K线数据查询等功能
+service MarketService {
+  // 搜索股票接口
+  // 根据关键词搜索匹配的股票，支持模糊匹配
+  rpc SearchStocks (SearchStocksRequest) returns (SearchStocksReply) {
+    option (google.api.http) = {
+      get: "/api/market/v1/stocks/search"
+    };
+  }
+
+  // 获取实时行情接口
+  // 根据股票代码列表获取多只股票的实时行情数据
+  rpc GetRealtimeQuotes (GetRealtimeQuotesRequest) returns (GetRealtimeQuotesReply) {
+    option (google.api.http) = {
+      post: "/api/market/v1/quotes/realtime"
+      body: "*"
+    };
+  }
+
+  // 获取K线数据接口
+  // 查询指定股票的历史K线数据，支持不同时间周期
+  rpc GetKLines (GetKLinesRequest) returns (GetKLinesReply) {
+    option (google.api.http) = {
+      get: "/api/market/v1/kline"
+    };
+  }
+}
+
+// 股票基本信息
+message StockBasic {
+  string ts_code = 1;   // Tushare 股票代码，如 "000001.SZ"
+  string symbol = 2;    // 股票代码，如 "000001"
+  string name = 3;      // 股票名称，如 "平安银行"
+  string market = 4;    // 所属市场，如 "沪深A股"、"港股" 等
+}
+
+// 搜索股票请求参数
+message SearchStocksRequest {
+  string keyword = 1;   // 搜索关键词，支持股票代码或名称模糊匹配
+  int32 limit = 2;      // 返回结果数量限制，默认为 10
+}
+
+// 搜索股票响应结果
+message SearchStocksReply {
+  repeated StockBasic stocks = 1;  // 匹配的股票列表
+}
+
+// 获取实时行情请求参数
+message GetRealtimeQuotesRequest {
+  repeated string codes = 1;  // 股票代码列表，如 ["000001", "600000"]
+}
+
+// 股票实时行情数据
+message Quote {
+  string code = 1;              // 股票代码
+  string name = 2;              // 股票名称
+  string price = 3;             // 当前价格
+  string open = 4;              // 今日开盘价
+  string pre_close = 5;         // 昨日收盘价
+  string high = 6;              // 今日最高价
+  string low = 7;               // 今日最低价
+  double change_percent = 8;    // 涨跌幅（百分比），如 2.5 表示上涨 2.5%
+  double change_price = 9;      // 涨跌额（价格变动值）
+  string date = 10;             // 行情日期，格式 "YYYY-MM-DD"
+  string time = 11;             // 行情时间，格式 "HH:MM:SS"
+  string volume = 12;           // 成交量（手）
+  string amount = 13;           // 成交额（元）
+}
+
+// 获取实时行情响应结果
+message GetRealtimeQuotesReply {
+  repeated Quote quotes = 1;  // 实时行情列表，与请求中的股票代码顺序对应
+}
+
+// 获取K线数据请求参数
+message GetKLinesRequest {
+  string code = 1;    // 股票代码
+  string ktype = 2;   // K线类型，支持 "D"(日线)、"W"(周线)、"M"(月线)、"5"(5分钟)、"15"(15分钟)、"30"(30分钟)、"60"(60分钟)
+  int32 limit = 3;    // 返回K线数量限制
+}
+
+// 单条K线数据
+message KLineData {
+  string day = 1;             // K线日期，格式 "YYYY-MM-DD"
+  string open = 2;            // 开盘价
+  string close = 3;           // 收盘价
+  string high = 4;            // 最高价
+  string low = 5;             // 最低价
+  string volume = 6;          // 成交量（手）
+  string amount = 7;          // 成交额（元）
+  string change_percent = 8;  // 涨跌幅（百分比）
+  string change_value = 9;    // 涨跌额
+}
+
+// 获取K线数据响应结果
+message GetKLinesReply {
+  repeated KLineData klines = 1;  // K线数据列表，按时间倒序排列
+}

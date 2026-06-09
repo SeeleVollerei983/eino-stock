@@ -1,0 +1,37 @@
+﻿# === Go ===
+*.exe *.exe~ *.dll *.dylib
+*.test *.out *.o *.a *.so
+vendor/ go.work
+bin/
+
+# === Build output ===
+build/
+
+# === Frontend (npm) ===
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# === Embedded frontend (copied from dist) ===
+internal/server/web/
+
+# === Runtime data ===
+data/
+*.db
+*.sqlite
+
+# === Logs ===
+*.log
+
+# === Temp scripts ===
+fix_*.mjs
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+.codegraph/
+
+# === OS ===
+Thumbs.db .DS_Store
+*.cert *.key

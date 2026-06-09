@@ -1,0 +1,5 @@
+﻿{
+  "name": "@wailsapp/runtime",
+  "version": "2.0.0",
+  "main": "runtime.js"
+}

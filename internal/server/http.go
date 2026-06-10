@@ -26,8 +26,6 @@ func NewHTTPServer(c *conf.Server, market *service.MarketService, screen *servic
 	apiMux := http.NewServeMux()
 	market.RegisterHTTP(apiMux)
 	screen.RegisterHTTP(apiMux)
-	apiMux.HandleFunc("GET /api/market/global-indexes", service.GlobalIndexesJSON)
-	apiMux.HandleFunc("GET /api/market/telegraph-list", service.TelegraphJSON)
 	f10svc.RegisterHTTP(apiMux)
 	cronsvc.RegisterHTTP(apiMux)
 	promptsvc.RegisterHTTP(apiMux)
@@ -50,6 +48,17 @@ func NewHTTPServer(c *conf.Server, market *service.MarketService, screen *servic
 	srv.HandleFunc("/api/follow/list", fsvc.List)
 	srv.HandleFunc("/api/follow/add", fsvc.Add)
 	srv.HandleFunc("/api/follow/remove", fsvc.Remove)
+	// Market global-indexes & telegraph (registered on srv to avoid HandlePrefix stripping)
+	srv.HandleFunc("/api/market/global-indexes", service.GlobalIndexesJSON)
+	srv.HandleFunc("/api/market/telegraph-list", service.TelegraphJSON)
+
+	// Market statistics & hot topics
+	srv.HandleFunc("/api/market/today-statistic", service.MarketStatisticJSON)
+	srv.HandleFunc("/api/market/recent-statistic", service.RecentMarketStatisticJSON)
+	srv.HandleFunc("/api/market/hot-topic", service.HotTopicJSON)
+	srv.HandleFunc("/api/market/hot-event", service.HotEventJSON)
+	srv.HandleFunc("/api/market/hot-stock", service.HotStockJSON)
+
 	// Settings routes
 	srv.HandleFunc("/api/settings/get", settings.Get)
 	srv.HandleFunc("/api/settings/set", settings.Set)
@@ -58,12 +67,4 @@ func NewHTTPServer(c *conf.Server, market *service.MarketService, screen *servic
 	registerWebUI(srv)
 	return srv
 }
-
-
-
-
-
-
-
-
 

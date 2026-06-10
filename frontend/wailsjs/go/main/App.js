@@ -96,9 +96,9 @@ export function LongTigerRank(c) { return fetch("/api/tool/long-tiger").then(r=>
 export function ClsCalendar() { return Promise.resolve([]) }
 export function InvestCalendarTimeLine(y) { return Promise.resolve([]) }
 export function NewsPush(s) { return Promise.resolve([]) }
-export function HotEvent(d) { return Promise.resolve([]) }
-export function HotStock(d) { return Promise.resolve([]) }
-export function HotTopic(d) { return Promise.resolve([]) }
+export function HotEvent(d) { return fetch("/api/market/hot-event").then(r=>r.json()) }
+export function HotStock(d) { return fetch("/api/market/hot-stock?type="+d).then(r=>r.json()) }
+export function HotTopic(d) { return fetch("/api/market/hot-topic").then(r=>r.json()) }
 export function IndustryResearchReport(k) { return Promise.resolve([]) }
 export function AnalyzeSentiment(t) { return Promise.resolve({}) }
 export function AnalyzeSentimentWithFreqWeight(t) { return Promise.resolve({}) }
@@ -154,9 +154,9 @@ export function ShareAnalysis(c,f) { return Promise.resolve("ok") }
 export function ShareText(t,title) { return Promise.resolve("ok") }
 export function GetUserManual() { return Promise.resolve({Content:""}) }
 export function GetTimezone() { return Promise.resolve(Intl.DateTimeFormat().resolvedOptions().timeZone) }
-export function GetTodayMarketStatistic() { return Promise.resolve({}) }
+export function GetTodayMarketStatistic() { return fetch("/api/market/today-statistic").then(r=>r.json()) }
 export function GetMarketStatisticByDate(d) { return Promise.resolve({}) }
-export function GetRecentDaysMarketStatistic(d) { return Promise.resolve([]) }
+export function GetRecentDaysMarketStatistic(d) { return fetch("/api/market/recent-statistic?days="+d).then(r=>r.json()) }
 export function FetchAndSaveMarketStatistic() { return Promise.resolve("ok") }
 export function CheckFrequentTrading(c) { return Promise.resolve("") }
 export function CheckStockBaseInfo(c) { return Promise.resolve(null) }
@@ -190,3 +190,4 @@ export function OpenURL(u) { window.open(u,'_blank') }
 export function GetBKFundFlowListByDate(t) { return Promise.resolve([]) }
 export function GetBKFundFlowTopListByDate(t,e,n) { return Promise.resolve([]) }
 export function GetAllBKCodes() { return Promise.resolve([]) }
+

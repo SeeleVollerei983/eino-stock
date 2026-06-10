@@ -1,4 +1,4 @@
-package service
+﻿package service
 
 import (
 	"net/http"
@@ -17,9 +17,9 @@ func NewMarketService(uc *bizmarket.MarketUsecase) *MarketService {
 }
 
 func (s *MarketService) RegisterHTTP(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/market/stocks", s.searchStocks)
-	mux.HandleFunc("GET /api/market/quote/", s.getQuote)
-	mux.HandleFunc("GET /api/market/kline/", s.getKLines)
+	mux.HandleFunc("GET /market/stocks", s.searchStocks)
+	mux.HandleFunc("GET /market/quote/", s.getQuote)
+	mux.HandleFunc("GET /market/kline/", s.getKLines)
 }
 
 func (s *MarketService) searchStocks(w http.ResponseWriter, r *http.Request) {

@@ -8,22 +8,21 @@ package main
 
 import (
 	"eino-stock/internal/biz/ai"
-	"eino-stock/internal/biz/follow"
 	"eino-stock/internal/biz/cron"
 	"eino-stock/internal/biz/f10"
-	"eino-stock/internal/biz/prompt"
+	"eino-stock/internal/biz/follow"
 	"eino-stock/internal/biz/market"
+	"eino-stock/internal/biz/prompt"
 	"eino-stock/internal/biz/screen"
 	"eino-stock/internal/conf"
 	"eino-stock/internal/data"
 	"eino-stock/internal/infrastructure"
 	"eino-stock/internal/server"
 	"eino-stock/internal/service"
+
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-)
 
-import (
 	_ "go.uber.org/automaxprocs"
 )
 
@@ -67,7 +66,6 @@ func wireApp(confServer *conf.Server, confData *conf.Data, dataSource *conf.Data
 	settingsRepo := data.NewSettingRepo(db)
 	settingsService := service.NewSettingsService(settingsRepo)
 
-
 	// F10
 	f10Client := infrastructure.NewF10Client(dataSource, logger)
 	f10Usecase := f10.NewF10Usecase(f10Client)
@@ -81,8 +79,8 @@ func wireApp(confServer *conf.Server, confData *conf.Data, dataSource *conf.Data
 
 	// Search
 	promptRepo := data.NewPromptRepo(db)
-promptUsecase := prompt.NewPromptUsecase(promptRepo)
-promptService := service.NewPromptService(promptUsecase)
+	promptUsecase := prompt.NewPromptUsecase(promptRepo)
+	promptService := service.NewPromptService(promptUsecase)
 
 	searchService := service.NewSearchService()
 
@@ -94,6 +92,3 @@ promptService := service.NewPromptService(promptUsecase)
 	cleanup := func() {}
 	return app, cleanup, nil
 }
-
-
-

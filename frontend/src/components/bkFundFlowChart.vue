@@ -1,7 +1,7 @@
 ﻿<script setup lang="ts">
 import {onBeforeUnmount, onMounted, ref, watch, computed} from "vue";
 import {GetBKFundFlowListByDate, GetBKFundFlowTopListByDate, GetAllBKCodes} from "../../wailsjs/go/main/App";
-import echarts from "echarts";
+import * as echarts from "echarts";
 
 const props = defineProps({
   darkTheme: {
@@ -213,7 +213,7 @@ function renderChart(allData: { code: string; name: string; isInflow: boolean; p
   const option: echarts.EChartsOption = {
     backgroundColor: bgColor,
     title: {
-      text: `${dateLabel} 鏉垮潡璧勯噾娴佸悜 - 澶氭澘鍧楀姣擿,
+      text: `${dateLabel} 鏉垮潡璧勯噾娴佸悜 - 澶氭澘鍧楀姣擿`,
       left: '20px',
       textStyle: {color: props.darkTheme ? '#ccc' : '#456', fontSize: 16}
     },

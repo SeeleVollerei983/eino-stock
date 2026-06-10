@@ -168,7 +168,7 @@ func GlobalIndexesJSON(w http.ResponseWriter, r *http.Request) {
 		if !ok { continue }
 		for _, item := range items {
 			if m, ok := item.(map[string]any); ok {
-				result[g] = append(result[g], map[string]any{"name": m["name"], "zxj": m["zxj"], "zdf": m["zdf"], "code": m["code"], "img": m["img"], "state": m["state"]})
+				result[g] = append(result[g], map[string]any{"name": m["name"], "zxj": m["zxj"], "zdf": m["zdf"], "code": m["code"], "img": m["img"], "state": m["state"], "location": m["location"]})
 			}
 		}
 	}
@@ -235,4 +235,127 @@ func TelegraphJSON(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, []any{}, nil)
+}
+
+// MarketStatisticJSON 今日市场统计数据（涨跌家数比 + 涨跌停家数比）
+func MarketStatisticJSON(w http.ResponseWriter, r *http.Request) {
+	client := resty.New().SetTimeout(10*time.Second).SetHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+	resp, err := client.R().SetContext(r.Context()).
+		SetHeader("Referer", "https://www.cls.cn/").
+		Get("https://x-quote.cls.cn/quote/index/home?app=CailianpressWeb&os=web&sv=8.4.6")
+	if err != nil { writeError(w, 500, fmt.Errorf("cls: %w", err)); return }
+
+	var raw struct {
+		Data struct {
+			UpDownDis struct {
+				RiseNum int `json:"rise_num"`
+				FallNum int `json:"fall_num"`
+				UpNum   int `json:"up_num"`
+				DownNum int `json:"down_num"`
+			} `json:"up_down_dis"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal(resp.Body(), &raw); err != nil { writeError(w, 500, fmt.Errorf("parse: %w", err)); return }
+
+	d := raw.Data.UpDownDis
+	now := time.Now()
+	totalUp, totalDown := d.RiseNum, d.FallNum
+	limitUp, limitDown := d.UpNum, d.DownNum
+
+	var upRatio, upDownRatio, limitRatio float64
+	total := totalUp + totalDown
+	if total > 0 { upRatio = float64(totalUp) / float64(total) * 100 }
+	if totalDown > 0 { upDownRatio = float64(totalUp) / float64(totalDown) } else if totalUp > 0 { upDownRatio = float64(totalUp) }
+	if limitDown > 0 { limitRatio = float64(limitUp) / float64(limitDown) } else if limitUp > 0 { limitRatio = float64(limitUp) }
+
+	sentimentDesc := "中性"
+	switch {
+	case upDownRatio >= 2: sentimentDesc = "普涨(极强)"
+	case upDownRatio >= 1.5: sentimentDesc = "偏强"
+	case upDownRatio > 1: sentimentDesc = "稍强"
+	case upDownRatio == 1: sentimentDesc = "中性"
+	case upDownRatio > 0.5: sentimentDesc = "稍弱"
+	case upDownRatio > 0: sentimentDesc = "偏弱"
+	default: sentimentDesc = "普跌(冰点)"
+	}
+
+	result := []map[string]any{{
+		"dataDate": now.Format("2006-01-02"),
+		"dataTime": now.Format("15:04"),
+		"upCount": totalUp, "downCount": totalDown,
+		"upRatio": upRatio, "upDownRatio": upDownRatio,
+		"sentimentDesc": sentimentDesc,
+		"limitUp": limitUp, "limitDown": limitDown, "limitRatio": limitRatio,
+	}}
+	writeJSON(w, result, nil)
+}
+
+// RecentMarketStatisticJSON 近N日市场统计（返回单日聚合数据）
+func RecentMarketStatisticJSON(w http.ResponseWriter, r *http.Request) {
+	MarketStatisticJSON(w, r)
+}
+
+// HotTopicJSON 东方财富股吧热门话题
+func HotTopicJSON(w http.ResponseWriter, r *http.Request) {
+	client := resty.New().SetTimeout(15*time.Second).SetHeader("User-Agent", "Mozilla/5.0")
+	resp, err := client.R().SetContext(r.Context()).
+		SetHeader("Host", "gubatopic.eastmoney.com").
+		SetHeader("Origin", "https://gubatopic.eastmoney.com").
+		SetHeader("Referer", "https://gubatopic.eastmoney.com/").
+		Get("https://gubatopic.eastmoney.com/interface/GetData.aspx?path=newtopic/api/Topic/HomePageListRead")
+	if err != nil { writeJSON(w, []any{}, nil); return }
+	var m map[string]any
+	if err := json.Unmarshal(resp.Body(), &m); err != nil { writeJSON(w, []any{}, nil); return }
+	items, _ := m["re"].([]any)
+	if items == nil { items = []any{} }
+	writeJSON(w, items, nil)
+}
+
+// HotEventJSON 雪球热门事件（简化实现）
+func HotEventJSON(w http.ResponseWriter, r *http.Request) {
+	client := resty.New().SetTimeout(15*time.Second).SetHeader("User-Agent", "Mozilla/5.0")
+	resp, err := client.R().SetContext(r.Context()).
+		SetHeader("Host", "xueqiu.com").
+		SetHeader("Referer", "https://xueqiu.com/").
+		Get("https://xueqiu.com/hot_event/list.json?count=50")
+	if err != nil { writeJSON(w, []any{}, nil); return }
+	var m map[string]any
+	if err := json.Unmarshal(resp.Body(), &m); err != nil { writeJSON(w, []any{}, nil); return }
+	list, _ := m["list"].([]any)
+	if list == nil { list = []any{} }
+	writeJSON(w, list, nil)
+}
+
+// HotStockJSON 东方财富热门股票排行
+func HotStockJSON(w http.ResponseWriter, r *http.Request) {
+	marketType := r.URL.Query().Get("type")
+	if marketType == "" { marketType = "10" }
+	client := resty.New().SetTimeout(15*time.Second).SetHeader("User-Agent", "Mozilla/5.0")
+	resp, err := client.R().SetContext(r.Context()).
+		SetHeader("Referer", "https://quote.eastmoney.com/").
+		Get(fmt.Sprintf("https://push2.eastmoney.com/api/qt/clist/get?cb=&pn=1&pz=50&po=1&np=1&fields=f12,f14,f3,f2,f4,f6,f9,f8,f18,f20&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&ut=bd1d9ddb04089700cf9c27f6f7426281"))
+	if err != nil { writeJSON(w, []any{}, nil); return }
+	var m map[string]any
+	if err := json.Unmarshal(resp.Body(), &m); err != nil { writeJSON(w, []any{}, nil); return }
+	data, _ := m["data"].(map[string]any)
+	dl, _ := data["diff"].([]any)
+	out := make([]map[string]any, 0)
+	for _, item := range dl {
+		if it, ok := item.(map[string]any); ok {
+			code, _ := it["f12"].(string)
+			name, _ := it["f14"].(string)
+			price, _ := it["f2"].(float64)
+			pct, _ := it["f3"].(float64)
+			exchange := "SH"
+			if len(code) == 6 && code[0] != '6' && code[0] != '9' { exchange = "SZ" }
+			out = append(out, map[string]any{
+				"code": code, "name": name, "exchange": exchange,
+				"current": price, "percent": pct,
+				"value": it["f20"], "increment": it["f4"],
+				"rank_change": it["f9"],
+			})
+		}
+	}
+	if out == nil { out = []map[string]any{} }
+	writeJSON(w, out, nil)
 }

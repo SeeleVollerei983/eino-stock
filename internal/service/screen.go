@@ -16,9 +16,9 @@ func NewScreenService(uc *bizscreen.ScreenUsecase) *ScreenService {
 }
 
 func (s *ScreenService) RegisterHTTP(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/screen/bk/", s.searchBk)
-	mux.HandleFunc("GET /api/screen/etf/", s.searchETF)
-	mux.HandleFunc("GET /api/screen/hot-strategy", s.hotStrategy)
+	mux.HandleFunc("GET /screen/bk/", s.searchBk)
+	mux.HandleFunc("GET /screen/etf/", s.searchETF)
+	mux.HandleFunc("GET /screen/hot-strategy", s.hotStrategy)
 }
 
 func (s *ScreenService) searchBk(w http.ResponseWriter, r *http.Request) {

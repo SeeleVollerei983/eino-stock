@@ -18,7 +18,7 @@ func NewCronService(uc *bizcron.CronUsecase) *CronService {
 }
 
 func (s *CronService) RegisterHTTP(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/cron/list", s.list)
+	mux.HandleFunc("GET /cron/list", s.list)
 	mux.HandleFunc("POST /api/cron/create", s.create)
 	mux.HandleFunc("POST /api/cron/update", s.update)
 	mux.HandleFunc("POST /api/cron/delete", s.delete)

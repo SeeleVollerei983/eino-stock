@@ -18,7 +18,7 @@ func NewPromptService(uc *bizprompt.PromptUsecase) *PromptService {
 }
 
 func (s *PromptService) RegisterHTTP(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/prompt/list", s.list)
+	mux.HandleFunc("GET /prompt/list", s.list)
 	mux.HandleFunc("POST /api/prompt/create", s.create)
 	mux.HandleFunc("POST /api/prompt/update", s.update)
 	mux.HandleFunc("POST /api/prompt/delete", s.delete)

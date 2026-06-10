@@ -15,11 +15,11 @@ func NewF10Service(uc *bizf10.F10Usecase) *F10Service {
 }
 
 func (s *F10Service) RegisterHTTP(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/f10/latest-finance", s.latestFinance)
-	mux.HandleFunc("GET /api/f10/qtr-finance", s.qtrFinance)
-	mux.HandleFunc("GET /api/f10/holder-trend", s.holderTrend)
-	mux.HandleFunc("GET /api/f10/org-predict", s.orgPredict)
-	mux.HandleFunc("GET /api/f10/predict-summary", s.predictSummary)
+	mux.HandleFunc("GET /f10/latest-finance", s.latestFinance)
+	mux.HandleFunc("GET /f10/qtr-finance", s.qtrFinance)
+	mux.HandleFunc("GET /f10/holder-trend", s.holderTrend)
+	mux.HandleFunc("GET /f10/org-predict", s.orgPredict)
+	mux.HandleFunc("GET /f10/predict-summary", s.predictSummary)
 }
 
 func (s *F10Service) latestFinance(w http.ResponseWriter, r *http.Request) {
